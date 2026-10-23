@@ -1,4 +1,4 @@
-
+# Checks CSV data quality and malformed rows.
 """CSV Data Quality Analyzer."""
 
 import csv
