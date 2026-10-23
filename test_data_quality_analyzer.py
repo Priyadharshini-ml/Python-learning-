@@ -42,11 +42,32 @@ class TestDataQualityAnalyzer(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             analyze_csv(self.csv_file)
 
-
     def test_rows_with_extra_fields(self):
         self.write_csv("name,city\nAnu,Chennai,Extra\n")
         report = analyze_csv(self.csv_file)
         self.assertEqual(report["rows"], 1)
+        self.assertEqual(report["malformed_row_count"], 1)
+        self.assertEqual(
+            report["malformed_rows"],
+            [{
+                "line": 2,
+                "expected_fields": 2,
+                "actual_fields": 3,
+            }],
+        )
+
+    def test_rows_with_too_few_fields(self):
+        self.write_csv("name,city\nAnu\n")
+        report = analyze_csv(self.csv_file)
+        self.assertEqual(report["malformed_row_count"], 1)
+        self.assertEqual(
+            report["missing_values_by_column"]["city"], 1
+        )
+
+    def test_valid_rows_not_malformed(self):
+        self.write_csv("name,city\nAnu,Chennai\n")
+        report = analyze_csv(self.csv_file)
+        self.assertEqual(report["malformed_row_count"], 0)
 
 
 if __name__ == "__main__":
