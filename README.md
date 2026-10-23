@@ -20,7 +20,7 @@ Goals
 
 - Build practical projects
 - Improve coding and problem-solving skills
-- Prepare for AI internships
+
 
 Contact
 
