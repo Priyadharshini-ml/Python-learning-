@@ -43,5 +43,11 @@ class TestDataQualityAnalyzer(unittest.TestCase):
             analyze_csv(self.csv_file)
 
 
+    def test_rows_with_extra_fields(self):
+        self.write_csv("name,city\nAnu,Chennai,Extra\n")
+        report = analyze_csv(self.csv_file)
+        self.assertEqual(report["rows"], 1)
+
+
 if __name__ == "__main__":
     unittest.main()
