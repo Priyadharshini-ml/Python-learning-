@@ -1,63 +1,28 @@
+Hi, I'm Priyadharshini
 
-Python Learning & Projects
+Second-year B.E. Computer Science and Engineering student at Sri Venkateswara College of Engineering (SVCE).
+ Currently learning Python, SQL, and Machine Learning.
 
-Hi! I'm Priyadharshini, a second-year B.E. Computer Science and Engineering student at Sri Venkateswara College of Engineering (SVCE).
+Building projects to strengthen my programming and problem-solving skills.
 
-I'm building my Python programming skills and developing beginner-friendly projects as part of my learning journey.
-
-Projects
-
-1. Hello World
-
-- Demonstrates basic Python output and variables.
-
-2. Personal Introduction
-
-- Collects user information and displays a personal profile.
-- Includes basic input validation.
-
-3. Student Performance Analyzer
-
-- Calculates average, highest and lowest marks.
-- Assigns a grade based on the average.
-
-4. Expense Tracker
-
-- Records expenses and summarizes spending by category.
-- Uses CSV files to store data.
-
-5. Weather Dashboard
-
-- Retrieves weather information using a weather API.
-- Requires an API key.
-
-6. AI Resume Matcher
-
-- Compares resume text with a job description using text-processing techniques.
-- Produces a similarity score, not a hiring probability.
-
-7. Sentiment Analyzer
-
-- Demonstrates basic sentiment classification using machine learning.
-
-8. CSV Data Quality Analyzer
-
-- Detects missing values and duplicate rows.
-- Reports dataset completeness.
-- Uses Python's built-in CSV and JSON libraries.
-
-Technologies
+ Technical Skills
 
 - Python
 - SQL
-- CSV and JSON
-- scikit-learn
-- API integration
+- Machine Learning fundamentals
+- Git and GitHub
+
+Projects
+
+- Student Performance Analyzer — Analyzes marks and assigns grades.
+- Expense Tracker — Records and summarizes expenses.
+- CSV Data Quality Analyzer — Identifies missing values and duplicate rows.
+- AI Resume Matcher — Compares resume text with job descriptions.
 
 Current Goal
 
-Improve my programming skills, build useful projects, and prepare for AI and software development internships.
+Learning AI and software development while preparing for internship opportunities.
 
-Note
+Connect with me
 
-These projects are learning exercises. I'm continuing to improve their testing, documentation, and functionality.
+- GitHub: "Priyadharshini-ml" (https://github.com/Priyadharshini-ml)
