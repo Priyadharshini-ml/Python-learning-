@@ -1,106 +1,74 @@
 
-"""CSV Data Quality Analyzer."""
-
-import csv
-import json
-import sys
-from collections import Counter
+import tempfile
+import unittest
 from pathlib import Path
 
+from data_quality_analyzer import analyze_csv
 
-def analyze_csv(file_path):
-    """Analyze a CSV dataset and return a quality report."""
-    path = Path(file_path)
 
-    if not path.exists():
-        raise FileNotFoundError(f"File not found: {path}")
-    if not path.is_file():
-        raise ValueError(f"Not a file: {path}")
+class TestDataQualityAnalyzer(unittest.TestCase):
 
-    with path.open("r", newline="", encoding="utf-8-sig") as file:
-        reader = csv.DictReader(file)
+    def setUp(self):
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp_dir.cleanup)
+        self.csv_file = Path(self.temp_dir.name) / "sample.csv"
 
-        if reader.fieldnames is None:
-            raise ValueError("CSV file is empty or has no header.")
+    def write_csv(self, content):
+        self.csv_file.write_text(content, encoding="utf-8")
 
-        headers = reader.fieldnames
+    def test_missing_values(self):
+        self.write_csv("name,city\nAnu,Chennai\nRavi,\n")
+        report = analyze_csv(self.csv_file)
+        self.assertEqual(report["missing_cells"], 1)
 
-        if not headers or any(
-            header is None or not header.strip()
-            for header in headers
-        ):
-            raise ValueError("CSV headers must not be empty.")
-
-        if len(set(headers)) != len(headers):
-            raise ValueError("Duplicate column names detected.")
-
-        rows = list(reader)
-
-    missing = Counter()
-    seen_rows = set()
-    duplicate_count = 0
-
-    for row in rows:
-        values = tuple(
-            (row.get(header) or "").strip()
-            for header in headers
+    def test_duplicate_rows(self):
+        self.write_csv("name,city\nAnu,Chennai\nAnu,Chennai\n")
+        report = analyze_csv(self.csv_file)
+        self.assertEqual(
+            report["duplicate_rows_after_first_occurrence"], 1
         )
 
-        for header, value in zip(headers, values):
-            if not value:
-                missing[header] += 1
+    def test_completeness(self):
+        self.write_csv("name,city\nAnu,Chennai\nRavi,\n")
+        report = analyze_csv(self.csv_file)
+        self.assertEqual(report["completeness_percent"], 75.0)
 
-        if values in seen_rows:
-            duplicate_count += 1
-        else:
-            seen_rows.add(values)
+    def test_empty_file(self):
+        self.write_csv("")
+        with self.assertRaises(ValueError):
+            analyze_csv(self.csv_file)
 
-    row_count = len(rows)
-    column_count = len(headers)
-    total_cells = row_count * column_count
-    missing_count = sum(missing.values())
+    def test_missing_file(self):
+        with self.assertRaises(FileNotFoundError):
+            analyze_csv(self.csv_file)
 
-    completeness = (
-        round(
-            100 * (total_cells - missing_count) / total_cells,
-            2,
+    def test_rows_with_extra_fields(self):
+        self.write_csv("name,city\nAnu,Chennai,Extra\n")
+        report = analyze_csv(self.csv_file)
+        self.assertEqual(report["rows"], 1)
+        self.assertEqual(report["malformed_row_count"], 1)
+        self.assertEqual(
+            report["malformed_rows"],
+            [{
+                "line": 2,
+                "expected_fields": 2,
+                "actual_fields": 3,
+            }],
         )
-        if total_cells
-        else 100.0
-    )
 
-    return {
-        "file": path.name,
-        "rows": row_count,
-        "columns": column_count,
-        "column_names": headers,
-        "missing_values_by_column": {
-            header: missing.get(header, 0)
-            for header in headers
-        },
-        "missing_cells": missing_count,
-        "duplicate_rows_after_first_occurrence": duplicate_count,
-        "completeness_percent": completeness,
-    }
-
-
-def main():
-    if len(sys.argv) != 2:
-        print(
-            "Usage: python data_quality_analyzer.py <input.csv>",
-            file=sys.stderr,
+    def test_rows_with_too_few_fields(self):
+        self.write_csv("name,city\nAnu\n")
+        report = analyze_csv(self.csv_file)
+        self.assertEqual(report["malformed_row_count"], 1)
+        self.assertEqual(
+            report["missing_values_by_column"]["city"], 1
         )
-        return 2
 
-    try:
-        report = analyze_csv(sys.argv[1])
-    except (OSError, UnicodeError, csv.Error, ValueError) as error:
-        print(f"Error: {error}", file=sys.stderr)
-        return 1
-
-    print(json.dumps(report, indent=2, ensure_ascii=False))
-    return 0
+    def test_valid_rows_not_malformed(self):
+        self.write_csv("name,city\nAnu,Chennai\n")
+        report = analyze_csv(self.csv_file)
+        self.assertEqual(report["malformed_row_count"], 0)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    unittest.main()
